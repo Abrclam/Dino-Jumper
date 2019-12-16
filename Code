@@ -1,0 +1,101 @@
+import pygame
+import random
+
+print("Jumper")
+
+pygame.init()
+
+#making screeeeeeeeeeen
+screen = pygame.display.set_mode((640,480))
+pygame.display.set_caption("Dino Jump")
+
+doExit=False
+
+clock = pygame.time.Clock()
+
+#game variables
+playerx = 25
+playery = 450
+yVel = 0
+touchGround = False
+
+CloudHeights = [300,350,280,260]
+CactusHeights= [80,40,20,80,30]
+CloudXpos=[]
+CactusXpos=[]#creates empty list
+
+for x in range(1,5): #a for loop that runs 5 times
+    #the append function adds an entry to our array
+    CactusXpos.append(random.randrange(200,3000))
+    CloudXpos.append(random.randrange(200,3000))
+CactusImg = pygame.image.load('cactus.png')
+CloudImg = pygame.image.load('Cloud.png')
+#game loop
+while not doExit:
+#timer section###################
+    clock.tick(60)
+    for event in pygame.event.get(): #event queue
+        if event.type == pygame.QUIT:
+            doExit = True;
+    
+    #move cactises from right to left
+    CactusXpos = [x-5 for x in CactusXpos]
+    CloudXpos = [x-2 for x in CloudXpos]
+    #update cactus location if they're off the screen
+    for x in range(len(CactusXpos)):
+        if CactusXpos[x]<0:
+            CactusXpos[x]=random.randrange(640, 5000)
+            print("Reset to ", CactusXpos[x])#for testing
+    
+    for x in range(len(CloudXpos)):
+        if CloudXpos[x]<0:
+            CloudXpos[x]=random.randrange(640, 4000)
+    
+    #cactusiss collision
+    for x,y in zip(CactusXpos,CactusHeights):
+        a = pygame.Rect((x,480-y), (30,80))
+        b = pygame.Rect((playerx,playery),(30,30))
+        if a.colliderect(b) == True:
+            print("COLLISION")
+            
+   
+    #updates position by adding velocity to position
+    playery += yVel
+    #turn off flying
+    if (playery + 30)<480:
+        playery+=2
+    
+    #gravity
+    if (playery == 450):
+        touchGround=True
+    else:
+        touchGround=False
+    
+    if touchGround == False:
+        yVel += 1
+    else:
+        yVel = 0
+    
+    
+    
+    #input section###################
+    # logic #############
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_w]&touchGround==True:
+        yVel=-20
+        
+     
+    
+    #render section###################
+    screen.fill((255,255,255))#wipe black
+    pygame.draw.rect(screen, (0,0,0),(playerx,playery,30,30),1)
+    pygame.draw.line(screen, (0,0,0),[1000,400],[0,400],1)
+    for x,y in zip(CactusXpos, CactusHeights):
+        screen.blit(CactusImg, (x-15,480-y))
+    for x,y in zip(CloudXpos, CloudHeights):
+        screen.blit(CloudImg, (x-15,480-y))
+    pygame.display.flip()
+    #end game loop###########
+
+
+pygame.quit()
